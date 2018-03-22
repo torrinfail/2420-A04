@@ -1,16 +1,16 @@
 import edu.princeton.cs.algs4.MinPQ;
 public class Solver
 {
-	private MinPQ steps;
-	private Board initial;
+	private MinPQ<SearchNode> steps;
+	private SearchNode initial;
 	public Solver(Board initial)
 	{
 		if(initial == null)
 			throw new NullPointerException("Cannot solve a null puzzle.");
 		if(!initial.isSolvable())
 			throw new IllegalArgumentException("Puzzle is not solvable.");
-		this.initial = initial;
-		steps = new MinPQ();
+		this.initial = new SearchNode(initial,null);
+		steps = new MinPQ<>();
 		steps.insert(initial);
 		Iterable<Board> next = steps.min().neighbors();
 		Board nextAdd;
@@ -68,8 +68,16 @@ public class Solver
 		public SearchNode(Board board, SearchNode previousNode)
 		{
 			this.board = board;
-			this.previousNode = previousNode;
-			movesBefore = previousNode.movesBefore + 1;
+			if(previousNode != null)
+			{
+				this.previousNode = previousNode;
+				movesBefore = previousNode.movesBefore + 1;
+			}
+		}
+
+		public int priority()
+		{
+			return movesBefore + board.hamming();
 		}
 	}
 }
