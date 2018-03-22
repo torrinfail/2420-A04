@@ -3,7 +3,7 @@ public class Solver
 {
 	private MinPQ<SearchNode> steps;
 	private SearchNode initial, solvedNode;
-	private Board solvedBoard = new Board({{1,2,3},{4,5,6},{7,8,0}});
+	int minMoves;
 	public Solver(Board initial)
 	{
 		if(initial == null)
@@ -12,9 +12,9 @@ public class Solver
 			throw new IllegalArgumentException("Puzzle is not solvable.");
 		this.initial = new SearchNode(initial,null);
 		steps = new MinPQ<>();
-		steps.insert(initial);
-		SearchNode current = initial;
-		while(!current.equals(solvedBoard))
+		steps.insert(this.initial);
+		SearchNode current = this.initial;
+		while(!current.board.isGoal())
 		{
 			for(Board b : current.board.neighbors())
 			{
@@ -27,17 +27,19 @@ public class Solver
 
 	public int moves()
 	{
-		return 0;
+		return solvedNode.movesBefore;
 	}
 
 	public Iterable<Board> solution()
 	{
-		Stack<SearchNode> s = new Stack();
+		//minMoves = 0;
+		Stack<Board> s = new Stack();
 		SearchNode node = solvedNode;
 		while(node != null)
 		{
-			s.push(node);
+			s.push(node.board);
 			node = node.previousNode;
+			minMoves++;
 		}		
 		return s;
 	}
@@ -53,7 +55,6 @@ public class Solver
 			for (int j = 0; j < N; j++)
 				blocks[i][j] = in.readInt();
 		Board initial = new Board(blocks);
-
 		// check if puzzle is solvable; if so, solve it and output solution
 		if (initial.isSolvable()) 
 		{
