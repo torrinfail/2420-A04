@@ -1,8 +1,9 @@
-import edu.princeton.cs.algs4.MinPQ;
+import edu.princeton.cs.algs4.*;
 public class Solver
 {
 	private MinPQ<SearchNode> steps;
-	private SearchNode initial;
+	private SearchNode initial, solvedNode;
+	private Board solvedBoard = new Board({{1,2,3},{4,5,6},{7,8,0}});
 	public Solver(Board initial)
 	{
 		if(initial == null)
@@ -12,14 +13,16 @@ public class Solver
 		this.initial = new SearchNode(initial,null);
 		steps = new MinPQ<>();
 		steps.insert(initial);
-		Iterable<Board> next = steps.min().neighbors();
-		Board nextAdd;
-		foreach(Board b : next)
+		SearchNode current = initial;
+		while(!current.equals(solvedBoard))
 		{
-			if(nextAdd == null || nextAdd.manhattan() < b.manhattan())
-				nextAdd = b;
+			for(Board b : current.board.neighbors())
+			{
+				steps.insert(new SearchNode(b,current));
+			}
+			current = steps.delMin();
 		}
-		steps.insert(nextAdd);
+		solvedNode = current;
 	}	
 
 	public int moves()
@@ -29,7 +32,14 @@ public class Solver
 
 	public Iterable<Board> solution()
 	{
-
+		Stack<SearchNode> s = new Stack();
+		SearchNode node = solvedNode;
+		while(node != null)
+		{
+			s.push(node);
+			node = node.previousNode;
+		}		
+		return s;
 	}
 
 	public static void main(String[] args) 
@@ -60,7 +70,7 @@ public class Solver
 		}
 	}	
 
-	private class SearchNode
+	private class SearchNode implements Comparable<SearchNode>
 	{
 		Board board;
 		int movesBefore;
@@ -78,6 +88,11 @@ public class Solver
 		public int priority()
 		{
 			return movesBefore + board.hamming();
+		}
+
+		public int compareTo(SearchNode otherNode)
+		{
+			return priority() - otherNode.priority();		
 		}
 	}
 }
